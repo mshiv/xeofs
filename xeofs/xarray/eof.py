@@ -178,6 +178,15 @@ class EOF(_BaseEOF):
         Xrec = super().reconstruct_X(mode=mode)
         Xrec = self._tf.back_transform(Xrec)
         return squeeze(Xrec)
+    
+    def reconstruct_randomized_X(
+        self,
+        rand_pcs : np.ndarray,
+        mode : Optional[Union[int, List[int], slice]] = None
+    ) -> DataArrayList:
+        Xrec = super().reconstruct_randomized_X(rand_pcs=rand_pcs,mode=mode)
+        Xrec = self._tf.back_transform(Xrec)
+        return squeeze(Xrec)
 
     def project_onto_eofs(
         self,
