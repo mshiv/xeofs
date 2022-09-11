@@ -276,6 +276,66 @@ class _BaseEOF():
         # Unweight and add mean
         return (Xrec / self._weights) + self._X_mean
 
+    def reconstruct_randomized_X(
+        self,
+        rand_pcs : np.ndarray,
+        mode : Optional[Union[int, List[int], slice]] = None
+    ) -> np.ndarray:
+        '''Reconstruct generated data field ``X`` using the phase randomized PCs and EOFs.
+
+        If weights were applied, ``X`` will be automatically rescaled.
+
+        Parameters
+        ----------
+        mode : Optional[Union[int, List[int], slice]]
+            Mode(s) based on which ``X`` will be reconstructed. If ``mode`` is
+            an int, a single mode is used. If a list of integers is provided,
+            use all specified modes for reconstruction. Alternatively, you may
+            want to select a slice to reconstruct. The first mode is denoted
+            by 1 (and not by 0). If None then ``X`` is recontructed using all
+            available modes (the default is None).
+
+        Examples
+        --------
+
+        Perform an analysis using some data ``X``:
+
+        >>> model = EOF(X, norm=True)
+        >>> model.solve()
+
+        Reconstruct ``X`` using all modes:
+
+        >>> model.reconstruct_X()
+
+        Reconstruct ``X`` using the first mode only:
+
+        >>> model.reconstruct_X(1)
+
+        Reconstruct ``X`` using mode 1, 3 and 4:
+
+        >>> model.reconstruct_X([1, 3, 4])
+
+        Reconstruct ``X`` using all modes up to mode 10 (including):
+
+        >>> model.reconstruct_X(slice(10))
+
+        Reconstruct ``X`` using every second mode between 4 and 8 (both
+        including):
+
+        >>> model.reconstruct_X(slice(4, 8, 2))
+
+
+        '''
+        eofs = self._eofs
+        pcs = rand_pcs * self._singular_values
+        # Select modes to reconstruct X
+        mode = get_mode_selector(mode)
+        eofs = eofs[:, mode]
+        pcs = pcs[:, mode]
+        Xrec = pcs @ eofs.T
+        # Unweight and add mean
+        return (Xrec / self._weights) + self._X_mean    
+    
     def project_onto_eofs(
         self,
         X : np.ndarray, scaling : int = 0
